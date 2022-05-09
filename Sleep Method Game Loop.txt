@@ -1,0 +1,37 @@
+@Override
+    // When an object (GamePanel) implementing interface Runnable is used to create
+    // a thread, starting the thread causes the object's run method to be
+    // called in that separately executing thread.
+    public void run() {
+
+        long currentTime = System.nanoTime();               // get current time from JVM in nanoseconds
+        double drawInterval = 1_000_000_000/FPS;            // 1 sec = 1BN nanoseconds per FPS
+        double nextDrawTime = currentTime + drawInterval;   // draw screen again at this time
+
+        // create a game loop which will be the core of the game
+        while (gameThread != null) {    // as long as gameThread exists
+
+            // 1. UPDATE: update information such as character positions
+            update();
+
+            // 2. DRAW: draw the screen with the updated information
+            repaint(); // how to call paintComponent method, weird
+
+            // 3. put game loop to sleep (pause) while game is in remaining time.
+            try {
+                double remainingTime = nextDrawTime - currentTime;  // how much time left until nextDrawTime
+                remainingTime = remainingTime / 1_000_000;          // convert remaining time from nano to milliseconds
+
+                if (remainingTime < 0) {    // check if there is any remaining time left
+                    remainingTime = 0;      // if drawInterval used up all the time, set remainingTime to zero
+                }
+
+                Thread.sleep((long) remainingTime);     // accepts time only in milliseconds
+
+                nextDrawTime += drawInterval;   // set new next draw time after the pause
+
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
